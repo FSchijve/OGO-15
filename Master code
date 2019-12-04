@@ -19,7 +19,11 @@ Serotonin_Adj_Time = 0,5                     % units: hour
 Serotonin_Mol_Weight = 176,215*1000          % units: pg/nmol
 TRP_Ratio_Converted_into_Ser_in_CSF = 0,01   % unitless
 
-
+%ProCyt_Eff_on_TRP komt van Immune Sector
+%Deze waardes zijn gekopieerd uit dat script om het hier te kunnen
+%gebruiken
+ProCyt_Eff_on_TRP = GRAPH(Avg_ProCyt_1/Ref_ProCyt)
+(1,000, 1,0000), (1,450, 0,9923), (1,900, 0,9837), (2,350, 0,9593), (2,800, 0,9348), (3,250, 0,8982), (3,700, 0,8452), (4,150, 0,7597), (4,600, 0,6498), (5,050, 0,5520), (5,500, 0,4624), (5,950, 0,3769), (6,400, 0,2955), (6,850, 0,2425), (7,300, 0,2004), (7,750, 0,1618), (8,200, 0,1386), (8,650, 0,1155), (9,100, 0,1039), (9,550, 0,1000), (10,000, 0,1000)
 
 % (DR) Curves
 "DR_Curve_for_Ser-Cortisol" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PostR))
