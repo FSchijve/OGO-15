@@ -79,7 +79,7 @@ Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors  
 
 Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors    % UNITS: nmol
 
-% Blocks
+% Stocks
 Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness
 Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness - Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time      % UNITS: 1/hour
 
@@ -88,6 +88,7 @@ Avg_Serotonin_Eff_on_Responsiveness(t) = Avg_Serotonin_Eff_on_Responsiveness(t -
             
             
 Serotonin = Ref_Serotonin_Concentration_in_CSF                                     % UNITS: pg/ml           
-Serotonin_Adjustment = (Possible_Implied_Serotonin-Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
+Serotonin_Adjustment = (Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
+%dSerotonin/dt=(Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time
  
 Serotonin(t) = Serotonin(t - dt) + (Serotonin_Adjustment) * dt                     % Serotonin(tijd - tijdsstap); Serotonin_Adjustment * tijdsstap
