@@ -78,7 +78,8 @@ Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight                       
 
 Serotonin_Eff_on_Responsiveness = GRAPH(LOG10(Serotonin_Vol)/LOG10(Ref_Serotonin_Vol_in_CSF))
 (-2,000, 2,000), (-1,500, 1,529), (-1,000, 1,267), (-0,500, 1,140), (0,000, 1,077), (0,500, 1,032), (1,000, 1,000), (1,500, 0,941), (2,000, 0,824), (2,500, 0,534), (3,000, 0,018)
-          
+%Origin: y =  1/(1+exp(-3.79*(x-0.93)))
+
 Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors  % UNITS: nmol
 
 Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors    % UNITS: nmol
