@@ -1,181 +1,97 @@
-**********
-Endocrine Sector:
-**********
+%%%%%%%%%%%%%%%%%
+% Neural_Sector %
+%%%%%%%%%%%%%%%%%
+
+% Vaststellen vaste waarden / parameters
+% (DR) Curves 
+% Functies
+% Koppeling met andere systemen 
+
+% Set values and parameters
+CSF_Volume = 150                             % units: ml
+Ref_Cort_Responsiveness_to_Ser = 0,8         % unitless
+Ref_RelTime_Responsiveness_to_Ser = 5        % unitless
+Ref_Ser_Responsiveness_to_Ser = 2            % unitless
+Ref_Serotonin_Concentration_in_CSF = 3500    % units: pg/ml
+Ref_TRP = 79                                 % units: micromole/liter
+Ser_Smoothing_Time = 12                      % units: hour
+Serotonin_Adj_Time = 0,5                     % units: hour
+Serotonin_Mol_Weight = 176,215*1000          % units: pg/nmol
+TRP_Ratio_Converted_into_Ser_in_CSF = 0,01   % unitless
+
+
+
+% (DR) Curves
+"DR_Curve_for_Ser-Cortisol" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PostR))
+(-1,000, 0,000), (-0,833333333333, 0,005), (-0,666666666667, 0,014), (-0,500, 0,023), (-0,333333333333, 0,036), (-0,166666666667, 0,045), (0,000, 0,054), (0,166666666667, 0,068), (0,333333333333, 0,086), (0,500, 0,118), (0,666666666667, 0,158), (0,833333333333, 0,231), (1,000, 0,375), (1,16666666667, 0,692), (1,33333333333, 0,882), (1,500, 0,941), (1,66666666667, 0,977), (1,83333333333, 0,991), (2,000, 1,000)
+    UNITS: Unitless %origin geeft y = (1.03*(x^5.63))/((1.04^5.63)+(x^5.63))
+"DR_Curve_for_Ser-RelTime" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PostR))
+(-1,000, 0,000), (-0,875, 0,000), (-0,750, 0,009), (-0,625, 0,018), (-0,500, 0,027), (-0,375, 0,045), (-0,250, 0,059), (-0,125, 0,081), (0,000, 0,118), (0,125, 0,167), (0,250, 0,217), (0,375, 0,290), (0,500, 0,398), (0,625, 0,525), (0,750, 0,674), (0,875, 0,810), (1,000, 0,900), (1,125, 0,959), (1,250, 0,982), (1,375, 0,986), (1,500, 0,995), (1,625, 0,995), (1,750, 1,000), (1,875, 1,000), (2,000, 1,000)
+    UNITS: Unitless  %Origin y = (1*(x^2.95))/((0.54^2.95)+(x^2.95))
+
+"DR_Curve_for_Serotonin-Serotonin" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PreR))
+(-1,000, 0,000), (-0,833333333333, 0,009), (-0,666666666667, 0,018), (-0,500, 0,027), (-0,333333333333, 0,045), (-0,166666666667, 0,0635), (0,000, 0,0815), (0,166666666667, 0,1175), (0,333333333333, 0,1585), (0,500, 0,1945), (0,666666666667, 0,2535), (0,833333333333, 0,350), (1,000, 0,500), (1,16666666667, 0,7285), (1,33333333333, 0,878), (1,500, 0,9455), (1,66666666667, 0,9775), (1,83333333333, 0,9955), (2,000, 1,000)
+    UNITS: unitless %origin: y= 1/(1+exp(-3.79*(x-0.928)))
+
+    
+% Functions
+Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF     % units: micromole/liter   
+
+Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;                % units: micromole/liter; ProCyt_Eff_on_TRP komt uit Immune sector                 
  
-%constanten
-Ref Cort Responsiveness to Cort = 2
-UNITS: Unitless
-Ref Cortisol = 250
-UNITS: nmol/l
-Ref Free Cortisol = 0,1*Ref Cortisol*Plasma Volume
-UNITS: nmol
-Ref GR Deg Fraction = 0
-UNITS: 1/hour
-Ref GR Function = 1
-UNITS: Unitless
-Ref GR Number = 6000
-UNITS: sites/cell
-Ref PostR Responsiveness to Cort = 2
-UNITS: Unitless
-Ref PreR Responsiveness to Cort = 2
-UNITS: Unitless
-Ref ProCyt Responsiveness to Cort = 2
-UNITS: Unitless
-Ref RelTime Responsiveness to Cort = 5
-UNITS: unitless
+Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*"DR_Curve_for_Ser-Cortisol"   % moet vermenigvuldigen met dx van curve -> forloop?
+
+Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
  
- 
-Permanent Degeneration Time = 10
-UNITS: hour
-Plasma Volume = 3
-UNITS: l
- 
-%%%%%%Graphs%%%%%
-Cort Eff on GR Number = GRAPH(LOG10(Free Cortisol)/LOG10(Ref Free
-Cortisol))
-(0,500, 1,5000), (0,550, 1,4968), (0,600, 1,4905), (0,650, 1,4810), (0,700, 1,4588), (0,750, 1,4398), (0,800, 1,3986), (0,850, 1,3258), (0,900, 1,2498), (0,950, 1,1357), (1,000, 1,0000), (1,050, 0,9489), (1,100, 0,9267), (1,150, 0,9077), (1,200, 0,8887), (1,250, 0,8697), (1,300, 0,8570), (1,350, 0,8475), (1,400, 0,8380), (1,450, 0,8285), (1,500, 0,8222), (1,550, 0,8158), (1,600, 0,8127), (1,650, 0,8063), (1,700, 0,8000), (1,750, 0,8000), (1,800, 0,8000) UNITS: unitless
- 
-Cortisol Ratio = LOG10(Free Cortisol)/LOG10(Shifted Ref Free Cortisol) UNITS: unitless
-?DR Curve for Cortisol-Cortisol? = GRAPH(Cortisol Ratio)
-95
-                                    (0,6000, 0,4000),
-(0,7250, 0,4271),
-(0,8500, 0,4950),
-(0,9750, 0,6661),
-(1,1000, 0,9729),
-(1,2250, 0,9973),
-UNITS: Unitless
-?DR Curve for Cortisol-PostR? = GRAPH(Cortisol Ratio)
-(1,000, 0,5000), (1,06666666667, 0,5000), (1,13333333333,
-(1,26666666667, 0,5317), (1,33333333333, 0,5656), (1,400,
-0,6516), (1,53333333333, 0,7308), (1,600, 0,8281), (1,66666666667, 0,8910), (1,73333333333, 0,9280), (1,800, 0,9590), (1,86666666667, 0,9842), (1,93333333333, 0,9955), (2,000, 1,0000)
-UNITS: Unitless
-?DR Curve for Cortisol-PreR? = GRAPH(Cortisol Ratio)
-(0,200, 0,1000), (0,300, 0,1081), (0,400, 0,1285), (0,500, 0,1611), (0,600, 0,1977), (0,700, 0,2385), (0,800, 0,2873), (0,900, 0,3688), (1,000, 0,5000), (1,100, 0,8452), (1,200, 0,9410), (1,300, 0,9770), (1,400, 0,9950), (1,500, 1,0000)
-UNITS: Unitless
-?DR Curve for Cortisol-ProCyt? = GRAPH(Cortisol Ratio)
-(0,6250, 0,4000), (0,6500, 0,4027), (0,6750, (0,7500, 0,4380), (0,7750, 0,4489), (0,8000, (0,8750, 0,5140), (0,9000, 0,5466), (0,9250, (1,0000, 0,7500), (1,0250, 0,8914), (1,0500, (1,1250, 0,9837), (1,1500, 0,9891), (1,1750, (1,2500, 1,0000), (1,2750, 1,0000), (1,3000,
-0,4081), (0,7000, 0,4190), 0,4652), (0,8250, 0,4787), 0,5792), (0,9500, 0,6145), 0,9348), (1,0750, 0,9566), 0,9919), (1,2000, 0,9946), 1,0000)
-    0,5045), (1,200, 0,5113), 0,5973), (1,46666666667,
+TRP_Eff_on_Serotonin_Capacity = GRAPH(Available_TRP/Ref_Available_TRP)          % grafiek benaderen
+(0,000, 0,200), (0,0555555555556, 0,200), (0,111111111111, 0,205), (0,166666666667, 0,219), (0,222222222222, 0,238), (0,277777777778, 0,276), (0,333333333333, 0,347), (0,388888888889, 0,476), (0,444444444444, 0,647), (0,500, 0,806), (0,555555555556, 0,976), (0,611111111111, 1,106), (0,666666666667, 1,212), (0,722222222222, 1,294), (0,777777777778, 1,359), (0,833333333333, 1,424), (0,888888888889, 1,465), (0,944444444444, 1,482), (1,000, 1,500)
+% Origin: y = 0.203 + (1.576-0.203)*x^4.465/ (0.528^4.465 + x^4.465)
+
+Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity   % UNITS: pg/ml
+
+Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
+
+Ser_Response_to_Ser = "DR_Curve_for_Serotonin-Serotonin"*Ser_Responsiveness_to_Ser
+
+Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser
+
+Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser           % UNITS: pg/ml
+    
+FuzzyMin_of_Serotonin = GRAPH(Implied_Serotonin/Serotonin_Capacity)
+(0,000, 0,000), (0,200, 0,200), (0,400, 0,400), (0,600, 0,600), (0,800, 0,800), (1,000, 0,927), (1,200, 0,979), (1,400, 1,000), (1,600, 1,000), (1,800, 1,000), (2,000, 1,000)
+%Origin: y=1*x^2.60/(0.45^2.60+x^2.60)
+Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity           % UNITS: pg/ml
+    
+Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF       % UNITS: pg
+    
+Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight       % UNITS: nmol
         
-(0,9000, 0,3000), (0,9250, 0,3032), (0,9500, 0,3285), (0,9750, 0,4077), (1,0000, 0,5000), (1,0250, 0,5724), (1,0500, 0,6389), (1,0750, 0,7023), (1,1000, 0,7624), (1,1250, 0,8195), (1,1500, 0,8765), (1,1750, 0,9208), (1,2000, 0,9525), (1,2250, 0,9715), (1,2500, 0,9873), (1,2750, 0,9937), (1,3000, 1,0000)
-UNITS: Unitless
-?DR Curve for Cortisol-RelTime? = GRAPH(Cortisol Ratio)
-(0,6000, 0,000), (0,6250, 0,005), (0,6500, 0,005), (0,6750, 0,009), (0,7000, 0,014), (0,7250, 0,027), (0,7500, 0,041), (0,7750, 0,063), (0,8000, 0,095), (0,8250, 0,136), (0,8500, 0,204), (0,8750, 0,285), (0,9000, 0,452), (0,9250, 0,602), (0,9500, 0,747), (0,9750, 0,833), (1,0000, 0,900), (1,0250, 0,932), (1,0500, 0,959), (1,0750, 0,973), (1,1000, 0,982), (1,1250, 0,982), (1,1500, 0,991), (1,1750, 0,995), (1,2000, 1,000)
-UNITS: unitless
-GR Number Eff on Responsiveness = GRAPH(LOG10(GR Number/Ref GR
-Number))
-(-0,3000, 0,100), (-0,2750, 0,249), (-0,2500, 0,399), (-0,2250, 0,528), (-0,2000, 0,613), (- 0,1750, 0,687), (-0,1500, 0,747), (-0,1250, 0,802), (-0,1000, 0,843), (-0,0750, 0,888), (-0,0500, 0,933), (-0,0250, 0,969), (0,0000, 1,000), (0,0250, 1,037), (0,0500, 1,064), (0,0750, 1,100), (0,1000, 1,123), (0,1250, 1,146), (0,1500, 1,159)
-UNITS: Unitless
-GR Function Effect = GRAPH(GR Function/Ref GR Function)
-(0,0000, 10,000), (0,0195, 10,000), (0,0390, 10,000), (0,0585, 10,000), (0,0780, 9,919), (0,0975, 9,878), (0,1170, 9,878), (0,1365, 9,837), (0,1560, 9,837), (0,1755, 9,796), (0,1950, 9,715), (0,2145, 9,715), (0,2340, 9,633), (0,2535, 9,593), (0,2730, 9,511), (0,2925, 9,430), (0,3120, 9,348), (0,3315, 9,267), (0,3510, 9,186), (0,3705, 9,145), (0,3900, 9,063), (0,4095, 8,941), (0,4290, 8,860), (0,4485, 8,778), (0,4680, 8,656), (0,4875, 8,575), (0,5070, 8,412),
-96
-                                                                 
-Unbound Cortisol Fraction = GRAPH(Cortisol)
-(250, 0,1000), (525, 0,1000), (800, 0,1000), (1075, 0,1009), (1350, 0,10181), (1625, 0,1127), (1900, 0,1434), (2175, 0,2014), (2450, 0,2973), (2725, 0,3878), (3000, 0,5000) UNITS: Unitless
- 
-       
-%%%Effects
-Free Cortisol = Cortisol*Unbound Cortisol Fraction*Plasma Volume
-UNITS: nmol
+RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser
+    
+RelTime_Response_to_Ser = "DR_Curve_for_Ser-RelTime"*RelTime_Responsiveness_to_Ser
+    
+Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser
+   
+Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser-RelTime_Response_to_Ser)
 
-PostR Responsiveness to Cort =                  %kan
-GR Number Eff on Responsiveness*Ref PostR Responsiveness to Cort UNITS: Unitless
-PostR Response to Cort =                        %kan
-?DR Curve for Cortisol-PostR?*PostR Responsiveness to Cort UNITS: Unitless
-PreR Responsiveness to Cort =                      %kan
-GR Number Eff on Responsiveness*Ref PreR Responsiveness to Cort UNITS: Unitless
-PreR Response to Cort =                            %kan
-?DR Curve for Cortisol-PreR?*PreR Responsiveness to Cort
-UNITS: Unitless
-ProCyt Responsiveness to Cort =
-GR Number Eff on Responsiveness*Ref ProCyt Responsiveness to Cort UNITS: Unitless
-ProCyt Response to Cort =
-?DR Curve for Cortisol-ProCyt?*ProCyt Responsiveness to Cort UNITS: Unitless
-98
+Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight                       % UNITS: nmol
 
-Cort Eff on PostReceptors = PostR Response to Cort %kan
-UNITS: Unitless
-Cort Eff on PreReceptors = PreR Response to Cort %kan 
-UNITS: Unitless
-Cort Responsiveness to Cort =                   %kan
-GR Number Eff on Responsiveness*Ref Cort Responsiveness to Cort
-UNITS: Unitless
-Cort Response to Cort =                          %kan
-?DR Curve for Cortisol-Cortisol?*Cort Responsiveness to Cort
-UNITS: Unitless
-RelTime Response to Cort =
-RelTime Responsiveness to Cort*?DR Curve for Cortisol-RelTime? UNITS: unitless
-RelTime Responsiveness to Cort =
-Ref RelTime Responsiveness to Cort*GR Number Eff on Responsiveness UNITS: unitless
-Shifted Ref Free Cortisol = Ref Free Cortisol*GR Function Effect UNITS: nmol
+Serotonin_Eff_on_Responsiveness = GRAPH(LOG10(Serotonin_Vol)/LOG10(Ref_Serotonin_Vol_in_CSF))
+(-2,000, 2,000), (-1,500, 1,529), (-1,000, 1,267), (-0,500, 1,140), (0,000, 1,077), (0,500, 1,032), (1,000, 1,000), (1,500, 0,941), (2,000, 0,824), (2,500, 0,534), (3,000, 0,018)
+          
+Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors  % UNITS: nmol
+
+Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors    % UNITS: nmol
+
+% Blocks
+Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness
+Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness - Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time      % UNITS: 1/hour
+
+Avg_Serotonin_Eff_on_Responsiveness(t) = Avg_Serotonin_Eff_on_Responsiveness(t - dt) + (Ser_Eff_Smoothing) * dt     % Avg(tijd - tijdsstap); Sef_Eff_(tijdsstap) 
+            
+            
+            
+Serotonin = Ref_Serotonin_Concentration_in_CSF                                     % UNITS: pg/ml           
+Serotonin_Adjustment = (Possible_Implied_Serotonin-Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
  
- 
-Cortisol Eff on Cortisol = (Cort Responsiveness to Cort-Cort Response to Cort) UNITS: Unitless %kan
-Cortisol Eff on ProCyt =
-(ProCyt Responsiveness to Cort-ProCyt Response to Cort) %kan 
-UNITS: Unitless
-Cortisol Eff on RelTime =                           %kan
-RelTime Responsiveness to Cort-RelTime Response to Cort
-UNITS: unitless
-Internal Effects on Cortisol =
-(Cortisol Eff on Cortisol+ProCyt Eff on Cortisol+Serotonin Eff on Cortisol) UNITS: Unitless
- 
- 
- 
-%%% differential equations
-Cortisol Adj Time = 0,1
-UNITS: hour
-INIT Cortisol = Ref Cortisol
-UNITS: nmol/l
-Internal Effects on Cortisol =
-(Cortisol Eff on Cortisol+ProCyt Eff on Cortisol+Serotonin Eff on Cortisol) UNITS: Unitless  %kan niet procyt eff on cortisol is graph verder op model en serotonin eff on  cortisol ook 
-Implied Cortisol = Ref Cortisol*(Stress Eff on Cortisol+Internal Effects on Cortisol) UNITS: nmol/l %kan
- 
-Cortisol Adjustment = (Implied Cortisol-Cortisol)/Cortisol Adj Time             %kan
-UNITS: nmol/l/Hour
- 
-INIT Cortisol = Ref Cortisol
-Cortisol(t) = Cortisol(t - dt) + (Cortisol Adjustment) * dtansig                %kan
-GR Degeneration Fraction = ProCyt Eff on GR Degeneration+Ref GR Deg Fraction UNITS: 1/hour              %kan niet procyt eff on gr degenaration staat pas verderop
-INIT GR Function = Ref GR Function                                  %kan
-INFLOWS:
-GR Repair Time = 10
- 
-Permanent Degeneration Time = 10
-UNITS: hour
-Plasma Volume = 3
-UNITS: l
-INIT Possible Max GR Function = Ref GR Function
-UNITS: unitless
- 
-Intended Max GR Function =
-ProCyt Eff on Permanent GR Degeneration*Ref GR Function                 %%%kan nog niet
- 
-Permanent Degeneration =
-(Possible Max GR Function-Intended Max GR Function)/Permanent Degeneration 
-Time
-Possible Max GR Function(t) =                               %kan
-Possible Max GR Function(t - dt) + ( - Permanent Degeneration) * dt
- 
- 
-GR Repair = (Possible Max GR Function-GR Function)/GR Repair Time   %%Kan denk ik?
-UNITS: 1/hour
-OUTFLOWS:
-GR Degeneration = GR Function*GR Degeneration Fraction          %kan             
-UNITS: 1/hour
-GR Function(t) = GR Function(t - dt) + (GR Repair - GR Degeneration) * dt 
- 
- 
-INIT GR Number = Ref GR Number
-UNITS: sites/cell
- 
-INFLOWS:
-Implied GR Number = Cort Eff on GR Number*Ref GR Number %kan
-GR Number Adj Time = 10             %Kan, constante
-UNITS: hour
-GR Number Regulation = (Implied GR Number-GR Number)/GR Number Adj          %kan
-GR Number(t) = GR Number(t - dt) + (GR Number Regulation) * dt              %kan
- 
- 
-%%%%tot hier
+Serotonin(t) = Serotonin(t - dt) + (Serotonin_Adjustment) * dt                     % Serotonin(tijd - tijdsstap); Serotonin_Adjustment * tijdsstap
