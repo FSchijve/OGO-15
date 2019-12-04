@@ -19,49 +19,43 @@ Serotonin_Adj_Time = 0,5                     % units: hour
 Serotonin_Mol_Weight = 176,215*1000          % units: pg/nmol
 TRP_Ratio_Converted_into_Ser_in_CSF = 0,01   % unitless
 
-%ProCyt_Eff_on_TRP komt van Immune Sector
-%Deze waardes zijn gekopieerd uit dat script om het hier te kunnen
-%gebruiken
-ProCyt_Eff_on_TRP = GRAPH(Avg_ProCyt_1/Ref_ProCyt)
-(1,000, 1,0000), (1,450, 0,9923), (1,900, 0,9837), (2,350, 0,9593), (2,800, 0,9348), (3,250, 0,8982), (3,700, 0,8452), (4,150, 0,7597), (4,600, 0,6498), (5,050, 0,5520), (5,500, 0,4624), (5,950, 0,3769), (6,400, 0,2955), (6,850, 0,2425), (7,300, 0,2004), (7,750, 0,1618), (8,200, 0,1386), (8,650, 0,1155), (9,100, 0,1039), (9,550, 0,1000), (10,000, 0,1000)
 
 % (DR) Curves
-"DR_Curve_for_Ser-Cortisol" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PostR))
-(-1,000, 0,000), (-0,833333333333, 0,005), (-0,666666666667, 0,014), (-0,500, 0,023), (-0,333333333333, 0,036), (-0,166666666667, 0,045), (0,000, 0,054), (0,166666666667, 0,068), (0,333333333333, 0,086), (0,500, 0,118), (0,666666666667, 0,158), (0,833333333333, 0,231), (1,000, 0,375), (1,16666666667, 0,692), (1,33333333333, 0,882), (1,500, 0,941), (1,66666666667, 0,977), (1,83333333333, 0,991), (2,000, 1,000)
-    UNITS: Unitless
-"DR_Curve_for_Ser-RelTime" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PostR))
-(-1,000, 0,000), (-0,875, 0,000), (-0,750, 0,009), (-0,625, 0,018), (-0,500, 0,027), (-0,375, 0,045), (-0,250, 0,059), (-0,125, 0,081), (0,000, 0,118), (0,125, 0,167), (0,250, 0,217), (0,375, 0,290), (0,500, 0,398), (0,625, 0,525), (0,750, 0,674), (0,875, 0,810), (1,000, 0,900), (1,125, 0,959), (1,250, 0,982), (1,375, 0,986), (1,500, 0,995), (1,625, 0,995), (1,750, 1,000), (1,875, 1,000), (2,000, 1,000)
-    UNITS: Unitless
+% Origin: DR Curve for Ser-Cortisol:
+DR_Curve_for_Ser_Cortisol = (1.03*(x^5.63))/((1.04^5.63)+(x^5.63))
+% Origin: DR Curve for Ser-RelTime:
+DR_Curve_for_Ser_RelTime = (1*(x^2.95))/((0.54^2.95)+(x^2.95))
+% Origin: DR Curve Serotonin-Serotonin: 
+DR_Curve_for_Serotonin_Serotonin = 1/(1+exp(-3.79*(x-0.928)))
 
-"DR_Curve_for_Serotonin-Serotonin" = GRAPH(LOG10(Serotonin_Vol)/LOG10(Shifted_Ref_Ser_for_PreR))
-(-1,000, 0,000), (-0,833333333333, 0,009), (-0,666666666667, 0,018), (-0,500, 0,027), (-0,333333333333, 0,045), (-0,166666666667, 0,0635), (0,000, 0,0815), (0,166666666667, 0,1175), (0,333333333333, 0,1585), (0,500, 0,1945), (0,666666666667, 0,2535), (0,833333333333, 0,350), (1,000, 0,500), (1,16666666667, 0,7285), (1,33333333333, 0,878), (1,500, 0,9455), (1,66666666667, 0,9775), (1,83333333333, 0,9955), (2,000, 1,000)
-    UNITS: unitless
+%ProCyt_Eff_on_TRP komt van Immune Sector
+%De formule is benaderd door Origin van de getekende grafiek uit deze
+%sector
+ProCyt_Eff_on_TRP = -0.038 + ((1+0.038)/(x/5.45))
 
-    
+
 % Functions
 Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF     % units: micromole/liter   
 
 Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;                % units: micromole/liter; ProCyt_Eff_on_TRP komt uit Immune sector                 
  
-Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*"DR_Curve_for_Ser-Cortisol"   % moet vermenigvuldigen met dx van curve -> forloop?
+Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol   % moet vermenigvuldigen met dx van curve -> forloop?
 
 Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
- 
-TRP_Eff_on_Serotonin_Capacity = GRAPH(Available_TRP/Ref_Available_TRP)          % grafiek benaderen
-(0,000, 0,200), (0,0555555555556, 0,200), (0,111111111111, 0,205), (0,166666666667, 0,219), (0,222222222222, 0,238), (0,277777777778, 0,276), (0,333333333333, 0,347), (0,388888888889, 0,476), (0,444444444444, 0,647), (0,500, 0,806), (0,555555555556, 0,976), (0,611111111111, 1,106), (0,666666666667, 1,212), (0,722222222222, 1,294), (0,777777777778, 1,359), (0,833333333333, 1,424), (0,888888888889, 1,465), (0,944444444444, 1,482), (1,000, 1,500)
+
+TRP_Eff_on_Serotonin = 0.203 + (1.576-0.203)*x^4.465/ (0.528^4.465 + x^4.465)           % Benaderd met Origin
 
 Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity   % UNITS: pg/ml
 
 Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
 
-Ser_Response_to_Ser = "DR_Curve_for_Serotonin-Serotonin"*Ser_Responsiveness_to_Ser
+Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser
 
 Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser
 
 Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser           % UNITS: pg/ml
     
-FuzzyMin_of_Serotonin = GRAPH(Implied_Serotonin/Serotonin_Capacity)
-(0,000, 0,000), (0,200, 0,200), (0,400, 0,400), (0,600, 0,600), (0,800, 0,800), (1,000, 0,927), (1,200, 0,979), (1,400, 1,000), (1,600, 1,000), (1,800, 1,000), (2,000, 1,000)
+FuzzyMin_of_Serotonin = 1*x^2.60/(0.45^2.60+x^2.60)                             % Benaderd met Origin
 
 Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity           % UNITS: pg/ml
     
@@ -71,7 +65,7 @@ Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight       
         
 RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser
     
-RelTime_Response_to_Ser = "DR_Curve_for_Ser-RelTime"*RelTime_Responsiveness_to_Ser
+RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser
     
 Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser
    
@@ -79,8 +73,7 @@ Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser-RelTime_Response_to_Se
 
 Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight                       % UNITS: nmol
 
-Serotonin_Eff_on_Responsiveness = GRAPH(LOG10(Serotonin_Vol)/LOG10(Ref_Serotonin_Vol_in_CSF))
-(-2,000, 2,000), (-1,500, 1,529), (-1,000, 1,267), (-0,500, 1,140), (0,000, 1,077), (0,500, 1,032), (1,000, 1,000), (1,500, 0,941), (2,000, 0,824), (2,500, 0,534), (3,000, 0,018)
+Serotonin_Eff_on_Responsiveness =  1/(1+exp(-3.79*(x-0.93)))                    % Benaderd door Origin
           
 Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors  % UNITS: nmol
 
@@ -98,4 +91,3 @@ Serotonin = Ref_Serotonin_Concentration_in_CSF                                  
 Serotonin_Adjustment = (Possible_Implied_Serotonin-Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
  
 Serotonin(t) = Serotonin(t - dt) + (Serotonin_Adjustment) * dt                     % Serotonin(tijd - tijdsstap); Serotonin_Adjustment * tijdsstap
-
