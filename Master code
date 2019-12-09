@@ -37,37 +37,37 @@ Avg_Serotonin_Eff_on_Responsiveness = 2.*x;                          % niet de g
 % Functions
 Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF;     % units: micromole/liter   
 
-Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;                % units: micromole/liter; ProCyt_Eff_on_TRP komt uit Immune sector                 
+Available_TRP = Ref_Available_TRP.*ProCyt_Eff_on_TRP;                % units: micromole/liter; ProCyt_Eff_on_TRP komt uit Immune sector                 
  
-Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
+Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser.*Avg_Serotonin_Eff_on_Responsiveness;
 
-Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol;   % moet vermenigvuldigen met dx van curve -> forloop?
+Cort_Response_to_Ser = Cort_Responsiveness_to_Ser.*DR_Curve_for_Ser_Cortisol;   % moet vermenigvuldigen met dx van curve -> forloop?
 
 TRP_Eff_on_Serotonin = 0.203 + (1.576-0.203).*x.^4.465./(0.528^4.465 + x.^4.465);           % Benaderd met Origin
-]
-TRP_Eff_on_Serotonin_Capacity = Available_TRP/Ref_Available_TRP;
 
-Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity;   % UNITS: pg/ml
+TRP_Eff_on_Serotonin_Capacity = Available_TRP./Ref_Available_TRP;
 
-Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
+Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF.*TRP_Eff_on_Serotonin_Capacity;   % UNITS: pg/ml
 
-Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser;
+Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser.*Avg_Serotonin_Eff_on_Responsiveness;
+
+Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin.*Ser_Responsiveness_to_Ser;
 
 Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser;
 
-Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser;           % UNITS: pg/ml
+Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF.*Ser_Eff_on_Ser;           % UNITS: pg/ml
     
 FuzzyMin_of_Serotonin = 1.*x.^2.60./(0.45^2.60+x.^2.60);                         % Benaderd met Origin
 
-Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity;           % UNITS: pg/ml
+Possible_Implied_Serotonin = FuzzyMin_of_Serotonin.*Serotonin_Capacity;           % UNITS: pg/ml
     
-Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF;       % UNITS: pg
+Ref_Serotonin_Mass_in_CSF = CSF_Volume.*Ref_Serotonin_Concentration_in_CSF;       % UNITS: pg
     
-Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight;       % UNITS: nmol
+Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF./Serotonin_Mol_Weight;       % UNITS: nmol
         
-RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser;
+RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness.*Ref_RelTime_Responsiveness_to_Ser;
     
-RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser;
+RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime.*RelTime_Responsiveness_to_Ser;
     
 Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser;
    
@@ -75,13 +75,13 @@ Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser - RelTime_Response_to_
 
 Serotonin = Ref_Serotonin_Concentration_in_CSF;                                  % UNITS: pg/ml   
 
-Serotonin_Vol = CSF_Volume*Serotonin / Serotonin_Mol_Weight;                     % UNITS: nmol 
+Serotonin_Vol = CSF_Volume*Serotonin./Serotonin_Mol_Weight;                      % UNITS: nmol 
 
 Serotonin_Eff_on_Responsiveness =  1./(1+exp(-3.79.*(x-0.93)));                    % Benaderd door Origin
           
-Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors;  % UNITS: nmol
+Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF.*Cort_Eff_on_PostReceptors;  % UNITS: nmol
 
-Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors;    % UNITS: nmol
+Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF.*Cort_Eff_on_PreReceptors;    % UNITS: nmol
 
 % Stocks
 % Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness
