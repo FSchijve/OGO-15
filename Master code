@@ -6,89 +6,144 @@
 % (DR) Curves 
 % Functies
 % Koppeling met andere systemen 
-
+syms x t
 % Set values and parameters
-CSF_Volume = 150                             % units: ml
-Ref_Cort_Responsiveness_to_Ser = 0,8         % unitless
-Ref_RelTime_Responsiveness_to_Ser = 5        % unitless
-Ref_Ser_Responsiveness_to_Ser = 2            % unitless
-Ref_Serotonin_Concentration_in_CSF = 3500    % units: pg/ml
-Ref_TRP = 79                                 % units: micromole/liter
-Ser_Smoothing_Time = 12                      % units: hour
-Serotonin_Adj_Time = 0,5                     % units: hour
-Serotonin_Mol_Weight = 176,215*1000          % units: pg/nmol
-TRP_Ratio_Converted_into_Ser_in_CSF = 0,01   % unitless
+CSF_Volume = 150;                             % units: ml
+Ref_Cort_Responsiveness_to_Ser = 0,8;         % unitless
+Ref_RelTime_Responsiveness_to_Ser = 5;        % unitless
+Ref_Ser_Responsiveness_to_Ser = 2;            % unitless
+Ref_Serotonin_Concentration_in_CSF = 3500;    % units: pg/ml
+Ref_TRP = 79;                                 % units: micromole/liter
+Ser_Smoothing_Time = 12;                      % units: hour
+Serotonin_Adj_Time = 0,5;                     % units: hour
+Serotonin_Mol_Weight = 176,215*1000;          % units: pg/nmol
+TRP_Ratio_Converted_into_Ser_in_CSF = 0,01;   % unitless
 
 
 % (DR) Curves
 % Origin: DR Curve for Ser-Cortisol:
-DR_Curve_for_Ser_Cortisol = (1.03*(x^5.63))/((1.04^5.63)+(x^5.63))
+DR_Curve_for_Ser_Cortisol = (1.03*(x.^5.63))./((1.04^5.63)+(x.^5.63));
 % Origin: DR Curve for Ser-RelTime:
-DR_Curve_for_Ser_RelTime = (1*(x^2.95))/((0.54^2.95)+(x^2.95))
+DR_Curve_for_Ser_RelTime = (1*(x.^2.95))./((0.54^2.95)+(x.^2.95));
 % Origin: DR Curve Serotonin-Serotonin: 
-DR_Curve_for_Serotonin_Serotonin = 1/(1+exp(-3.79*(x-0.928)))
+DR_Curve_for_Serotonin_Serotonin = 1./(1+exp(-3.79*(x-0.928)));
 
 %ProCyt_Eff_on_TRP komt van Immune Sector
 %De formule is benaderd door Origin van de getekende grafiek uit deze
 %sector
-ProCyt_Eff_on_TRP = -0.038 + ((1+0.038)/(x/5.45))
-
+ProCyt_Eff_on_TRP = -0.038 + ((1+0.038)./(x./5.45));
+Avg_Serotonin_Eff_on_Responsiveness = 2.*x;                          % niet de goede formule, moet van andere sector komen
 
 % Functions
-Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF     % units: micromole/liter   
+Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF;     % units: micromole/liter   
 
 Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;                % units: micromole/liter; ProCyt_Eff_on_TRP komt uit Immune sector                 
  
-Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol   % moet vermenigvuldigen met dx van curve -> forloop?
+Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
 
-Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
+Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol;   % moet vermenigvuldigen met dx van curve -> forloop?
 
-TRP_Eff_on_Serotonin = 0.203 + (1.576-0.203)*x^4.465/ (0.528^4.465 + x^4.465)           % Benaderd met Origin
+TRP_Eff_on_Serotonin = 0.203 + (1.576-0.203).*x.^4.465./(0.528^4.465 + x.^4.465);           % Benaderd met Origin
+]
+TRP_Eff_on_Serotonin_Capacity = Available_TRP/Ref_Available_TRP;
 
-Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity   % UNITS: pg/ml
+Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity;   % UNITS: pg/ml
 
-Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness
+Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
 
-Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser
+Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser;
 
-Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser
+Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser;
 
-Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser           % UNITS: pg/ml
+Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser;           % UNITS: pg/ml
     
-FuzzyMin_of_Serotonin = 1*x^2.60/(0.45^2.60+x^2.60)                             % Benaderd met Origin
+FuzzyMin_of_Serotonin = 1.*x.^2.60./(0.45^2.60+x.^2.60);                         % Benaderd met Origin
 
-Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity           % UNITS: pg/ml
+Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity;           % UNITS: pg/ml
     
-Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF       % UNITS: pg
+Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF;       % UNITS: pg
     
-Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight       % UNITS: nmol
+Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight;       % UNITS: nmol
         
-RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser
+RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser;
     
-RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser
+RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser;
     
-Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser
+Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser;
    
-Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser-RelTime_Response_to_Ser)
+Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser - RelTime_Response_to_Ser);
 
-Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight                       % UNITS: nmol
+Serotonin = Ref_Serotonin_Concentration_in_CSF;                                  % UNITS: pg/ml   
 
-Serotonin_Eff_on_Responsiveness =  1/(1+exp(-3.79*(x-0.93)))                    % Benaderd door Origin
+Serotonin_Vol = CSF_Volume*Serotonin / Serotonin_Mol_Weight;                     % UNITS: nmol 
+
+Serotonin_Eff_on_Responsiveness =  1./(1+exp(-3.79.*(x-0.93)));                    % Benaderd door Origin
           
-Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors  % UNITS: nmol
+Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors;  % UNITS: nmol
 
-Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors    % UNITS: nmol
+Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors;    % UNITS: nmol
 
 % Stocks
-Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness
-Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness - Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time      % UNITS: 1/hour
+% Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness
+% Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness - Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time      % UNITS: 1/hour
+% 
+% Avg_Serotonin_Eff_on_Responsiveness(t) = Avg_Serotonin_Eff_on_Responsiveness(t - dt) + (Ser_Eff_Smoothing) * dt     % Avg(tijd - tijdsstap); Sef_Eff_(tijdsstap) 
+%             
+%             
+%             
+% Serotonin = Ref_Serotonin_Concentration_in_CSF                                     % UNITS: pg/ml           
+% Serotonin_Adjustment = (Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
+% %dSerotonin/dt=(Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time
+%  
+% Serotonin(t) = Serotonin(t - dt) + (Serotonin_Adjustment) * dt                     % Serotonin(tijd - tijdsstap); Serotonin_Adjustment * tijdsstap
 
-Avg_Serotonin_Eff_on_Responsiveness(t) = Avg_Serotonin_Eff_on_Responsiveness(t - dt) + (Ser_Eff_Smoothing) * dt     % Avg(tijd - tijdsstap); Sef_Eff_(tijdsstap) 
-            
-            
-            
-Serotonin = Ref_Serotonin_Concentration_in_CSF                                     % UNITS: pg/ml           
-Serotonin_Adjustment = (Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time   % UNITS: pg/ml/hour
-%dSerotonin/dt=(Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time
- 
-Serotonin(t) = Serotonin(t - dt) + (Serotonin_Adjustment) * dt                     % Serotonin(tijd - tijdsstap); Serotonin_Adjustment * tijdsstap
+SerFun = (Possible_Implied_Serotonin - Serotonin)/Serotonin_Adj_Time;
+TSPAN = [0 720];
+y0 = 0;
+[TOUT, YOUT] = ode45(SerFun,TSPAN,y0)
+
+
+
+
+%%%%%%%%%%%%%%%%%%
+% Stress_Sector: %
+%%%%%%%%%%%%%%%%%%
+% Nu ingesteld op referentiewaarde, dus wanneer lichaam geen stress ervaard
+
+% Set values and parameters
+Perceived_Stress = 0;                                                        % INPUT / Beginwaarde
+Perception_Del_Time = 24;                                                    % UNITS: hour
+Ref_Internal_Stress = 0;                                                     % UNITS: 1/hour    
+Ref_RelTime = 3;                                                             % UNITS: hour
+RelTime_Adj_Time = 0.1;                                                      % UNITS: hour 
+Stress_Stimulus_Duration = 0;                                                % UNITS: hour
+Stress_Stimulus_Level = 0;                                                   % UNITS: 1/hour
+
+
+% Graphs
+Stress_Eff_on_Cortisol = (10.53*(x.^2.45))./(5.78^2.45 + x.^2.45);
+Stress_Eff_on_ProCyt = (17.05*(x.^2.07))./(3.49^2.07 + x.^2.07);
+Stress_Eff_on_RelTime = (1.95*(x.^4.95))./(5.29^4.95 + x.^4.95);
+
+% If-statements
+Every_Day_Pattern = IF((TIME>1) AND (TIME<1+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>25) AND (TIME<25+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>49) AND (TIME<49+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>73) AND (TIME<73+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>97) AND (TIME<97+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>121) AND (TIME<121+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>145) AND (TIME<145+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>169) AND (TIME<169+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>193) AND (TIME<193+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>217) AND (TIME<217+Stress_Stimulus_Duration)) THEN (1) ELSE(0)
+Every_Three_Days_Pattern = IF((TIME>1) AND (TIME<1+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>73) AND (TIME<73+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>145) AND (TIME<145+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>217) AND (TIME<217+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>289) AND (TIME<289+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>361) AND (TIME<361+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>433) AND (TIME<433+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>505) AND (TIME<505+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>577) AND (TIME<577+Stress_Stimulus_Duration)) THEN (1) ELSE(0) +IF((TIME>649) AND (TIME<649+Stress_Stimulus_Duration)) THEN (1) ELSE(0)
+Single_Pattern = IF((TIME>0) AND (TIME<Stress_Stimulus_Duration)) THEN (1) ELSE(0)
+
+% 
+Avg_Stress_Perception = Perceived_Stress
+Internal_Stress = (ProCyt_Eff_on_Stress + Ref_Internal_Stress)              % UNITS: 1/hour 
+External_Stress = (0*Single_Pattern+0*Every_Day_Pattern +0*Every_Three_Days_Pattern)*Stress_Stimulus_Level      % UNITS: 1/hour
+% nullen moeten variabelen worden
+Stress_Perception = External_Stress + Internal_Stress                       % UNITS: 1/hour
+Stress_Perception_to_Average = Stress_Perception                            % UNITS: 1/hour
+Stress_Perception_Averaging = Avg_Stress_Perception/Perception_Del_Time     % UNITS: 1/hour
+Relieving_Time = Ref_RelTime                                                % UNITS: hour
+Implied_Relieving_Time = Ref_RelTime*(Stress_Eff_on_RelTime + Serotonin_Eff_on_RelTime + Cortisol_Eff_on_RelTime)   % UNITS: hour
+RelTime_Adjustment = (Implied_Relieving_Time - Relieving_Time)/RelTime_Adj_Time
+Stress_Relief = (Perceived_Stress/Relieving_Time)                           % UNITS: 1/hour 
+
+%Stocks
+Avg_Stress_Perception(t) = Avg_Stress_Perception(t - dt) + (Stress_Perception_to_Average - Stress_Perception_Averaging) * dt
+Perceived_Stress(t) = Perceived_Stress(t - dt) + (Stress_Perception - Stress_Relief) * dt
+Relieving_Time(t) = Relieving_Time(t - dt) + (RelTime_Adjustment) * dt
