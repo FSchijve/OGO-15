@@ -105,6 +105,7 @@ y0 = 0;
 
 
 
+
 %%%%%%%%%%%%%%%%%%
 % Stress_Sector: %
 %%%%%%%%%%%%%%%%%%
@@ -116,8 +117,8 @@ Perception_Del_Time = 24;                                                    % U
 Ref_Internal_Stress = 0;                                                     % UNITS: 1/hour    
 Ref_RelTime = 3;                                                             % UNITS: hour
 RelTime_Adj_Time = 0.1;                                                      % UNITS: hour 
-Stress_Stimulus_Duration = 0;                                                % UNITS: hour
-Stress_Stimulus_Level = 0;                                                   % UNITS: 1/hour
+Stress_Stimulus_Duration = 12/60;                                            % UNITS: hour
+Stress_Stimulus_Level = 1;                                                   % UNITS: 1/hour
 
 
 % Graphs
@@ -147,3 +148,35 @@ Stress_Relief = (Perceived_Stress/Relieving_Time)                           % UN
 Avg_Stress_Perception(t) = Avg_Stress_Perception(t - dt) + (Stress_Perception_to_Average - Stress_Perception_Averaging) * dt
 Perceived_Stress(t) = Perceived_Stress(t - dt) + (Stress_Perception - Stress_Relief) * dt
 Relieving_Time(t) = Relieving_Time(t - dt) + (RelTime_Adjustment) * dt
+
+
+
+
+% Choose in function if you want option 1, 2 or 3 e.g. Every Day, Every
+% Three Days or Single Pattern. 
+% Daarin for-loops
+Analyzed_Time = 50/Stress_Stimulus_Duration ;
+day = 25;
+level = zeros(Analyzed_Time,2);
+% Everyday_Pattern
+for time = 0:(12/60):Analyzed_Time                          % Analyzed_Time is totale tijd waarvoor je stress response sytem wil bekijken 
+    if time <= Stress_Stimulus_Duration 
+        level == Stress_Stimulus_Level
+    elseif isinteger(time/day) 
+        level = Stress_Stimulus_Level
+    else 
+        level == 0
+    end
+end
+
+% Every_Three_Days_Pattern
+for time = 0:1:Analyzed_Time
+    if time <= Stress_Stimulus_Duration 
+
+%Single_Pattern        
+for time = 0:1:Analyzed_Time
+    if time <= Stress_Stimulus_Duration
+        level = Stress_Simulus_Level
+    else 
+        level == 0
+
