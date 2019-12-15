@@ -1,50 +1,218 @@
-function dxdt = ODEs_project(t,x,pars) 
+matlab_script_project_3
+
+STARTTIME=0;
+STOPTIME=720;
+DT=0.0078125;
+time = STARTTIME:DT:STOPTIME;
+
+%tspan 
+tspan = [STARTTIME STOPTIME]; 
+ 
+%initialization equations 
+Ref_ProCyt = 1.5;
+Proinflammatory_Cytokine = Ref_ProCyt;
+Avg_ProCyt_1 = Proinflammatory_Cytokine;
+Avg_ProCyt_2 = Proinflammatory_Cytokine;
+Avg_ProCyt_3 = Proinflammatory_Cytokine;
+CSF_Volume = 150;
+Ref_Serotonin_Concentration_in_CSF = 3500;
+Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF;
+Serotonin_Mol_Weight = 176.215*1000;
+Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight;
+Serotonin = Ref_Serotonin_Concentration_in_CSF;
+Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight;
+Serotonin_Eff_on_Responsiveness = log10(Serotonin_Vol)/log10(Ref_Serotonin_Vol_in_CSF);
+Avg_Serotonin_Eff_on_Responsiveness = Serotonin_Eff_on_Responsiveness;
+Perceived_Stress = 0;
+Avg_Stress_Perception = Perceived_Stress;
+Ref_Cortisol = 250;
+Cortisol = Ref_Cortisol;
+Stress_Eff_on_ProCyt = Perceived_Stress;
+Delayed_Stress_Eff_on_ProCyt = Stress_Eff_on_ProCyt;
+Ref_GR_Function = 1;
+GR_Function = Ref_GR_Function;
+Ref_GR_Number = 6000;
+GR_Number = Ref_GR_Number;
+Possible_Max_GR_Function = Ref_GR_Function;
+Ref_RelTime = 3;
+Relieving_Time = Ref_RelTime;
+Stress_Eff_on_Cortisol = Perceived_Stress;
+GR_Number_Eff_on_Responsiveness = log10(GR_Number/Ref_GR_Number);
+Ref_Cort_Responsiveness_to_Cort = 2;
+Cort_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_Cort_Responsiveness_to_Cort;
+Plasma_Volume = 3;
+Unbound_Cortisol_Fraction = Cortisol;
+Free_Cortisol = Cortisol*Unbound_Cortisol_Fraction*Plasma_Volume;
+GR_Function_Effect = GR_Function/Ref_GR_Function;
+Ref_Free_Cortisol = 0.1*Ref_Cortisol*Plasma_Volume;
+Shifted_Ref_Free_Cortisol = Ref_Free_Cortisol*GR_Function_Effect;
+Cortisol_Ratio = log10(Free_Cortisol)/log10(Shifted_Ref_Free_Cortisol);
+DR_Curve_for_Cortisol_Cortisol = Cortisol_Ratio;
+Cort_Response_to_Cort = DR_Curve_for_Cortisol_Cortisol*Cort_Responsiveness_to_Cort;
+Cortisol_Eff_on_Cortisol = (Cort_Responsiveness_to_Cort-Cort_Response_to_Cort);
+Ref_Cort_Responsiveness_to_Ser = 0.8;
+Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
+DR_Curve_for_Cortisol_PostR = Cortisol_Ratio;
+Ref_PostR_Responsiveness_to_Cort = 2;
+PostR_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_PostR_Responsiveness_to_Cort;
+PostR_Response_to_Cort = DR_Curve_for_Cortisol_PostR*PostR_Responsiveness_to_Cort;
+Cort_Eff_on_PostReceptors = PostR_Response_to_Cort;
+Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors;
+DR_Curve_for_Ser_Cortisol = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR);
+Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol;
+Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser;
+ProCyt_Eff_on_Cortisol = Proinflammatory_Cytokine/Ref_ProCyt;
+Internal_Effects_on_Cortisol = (Cortisol_Eff_on_Cortisol+ProCyt_Eff_on_Cortisol+Serotonin_Eff_on_Cortisol);
+Implied_Cortisol = Ref_Cortisol*(Stress_Eff_on_Cortisol+Internal_Effects_on_Cortisol);
+Cortisol_Adj_Time = 0.1;
+Cortisol_Adjustment = (Implied_Cortisol-Cortisol)/Cortisol_Adj_Time;
+Stress_Eff_Del_Time = 0.5;
+Delaying_Stress_Effect = (Stress_Eff_on_ProCyt-Delayed_Stress_Eff_on_ProCyt)/Stress_Eff_Del_Time;
+GR_Number_Adj_Time = 10;
+Cort_Eff_on_GR_Number = log10(Free_Cortisol)/log10(Ref_Free_Cortisol);
+Implied_GR_Number = Cort_Eff_on_GR_Number*Ref_GR_Number;
+GR_Number_Regulation = (Implied_GR_Number-GR_Number)/GR_Number_Adj_Time;
+ProCyt_Adj_Time = 2;
+Ref_ProCyt_Responsiveness_to_Cort = 2;
+ProCyt_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_ProCyt_Responsiveness_to_Cort;
+DR_Curve_for_Cortisol_ProCyt = Cortisol_Ratio;
+ProCyt_Response_to_Cort = DR_Curve_for_Cortisol_ProCyt*ProCyt_Responsiveness_to_Cort;
+Cortisol_Eff_on_ProCyt = (ProCyt_Responsiveness_to_Cort-ProCyt_Response_to_Cort);
+Implied_ProCyt = Ref_ProCyt*(Delayed_Stress_Eff_on_ProCyt+Cortisol_Eff_on_ProCyt);
+ProCyt_Adjustment = (Implied_ProCyt-Proinflammatory_Cytokine)/ProCyt_Adj_Time;
+ProCyt_Smoothing_Time = 24;
+ProCyt_Smoothing1 = (Proinflammatory_Cytokine-Avg_ProCyt_1)/ProCyt_Smoothing_Time;
+ProCyt_Smoothing2 = (Avg_ProCyt_1-Avg_ProCyt_2)/ProCyt_Smoothing_Time;
+ProCyt_Smoothing3 = (Avg_ProCyt_2-Avg_ProCyt_3)/ProCyt_Smoothing_Time;
+DR_Curve_for_Cortisol_RelTime = Cortisol_Ratio;
+Ref_RelTime_Responsiveness_to_Cort = 5;
+RelTime_Responsiveness_to_Cort = Ref_RelTime_Responsiveness_to_Cort*GR_Number_Eff_on_Responsiveness;
+RelTime_Response_to_Cort = RelTime_Responsiveness_to_Cort*DR_Curve_for_Cortisol_RelTime;
+Cortisol_Eff_on_RelTime = RelTime_Responsiveness_to_Cort-RelTime_Response_to_Cort;
+DR_Curve_for_Ser_RelTime = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR);
+Ref_RelTime_Responsiveness_to_Ser = 5;
+RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser;
+RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser;
+Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser-RelTime_Response_to_Ser);
+Stress_Eff_on_RelTime = Avg_Stress_Perception;
+Implied_Relieving_Time = Ref_RelTime*(Stress_Eff_on_RelTime+Serotonin_Eff_on_RelTime+Cortisol_Eff_on_RelTime);
+RelTime_Adj_Time = 0.1;
+RelTime_Adjustment = (Implied_Relieving_Time-Relieving_Time)/RelTime_Adj_Time;
+Ser_Smoothing_Time = 12;
+Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness-Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time;
+Serotonin_Adj_Time = 0.5;
+Ref_Ser_Responsiveness_to_Ser = 2;
+Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
+DR_Curve_for_Cortisol_PreR = Cortisol_Ratio;
+Ref_PreR_Responsiveness_to_Cort = 2;
+PreR_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_PreR_Responsiveness_to_Cort;
+PreR_Response_to_Cort = DR_Curve_for_Cortisol_PreR*PreR_Responsiveness_to_Cort;
+Cort_Eff_on_PreReceptors = PreR_Response_to_Cort;
+Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors;
+DR_Curve_for_Serotonin_Serotonin = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PreR);
+Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser;
+Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser;
+Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser;
+TRP_Ratio_Converted_into_Ser_in_CSF = 0.01;
+Ref_TRP = 79;
+Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF;
+ProCyt_Eff_on_TRP = Avg_ProCyt_1/Ref_ProCyt;
+Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;
+TRP_Eff_on_Serotonin_Capacity = Available_TRP/Ref_Available_TRP;
+Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity;
+FuzzyMin_of_Serotonin = Implied_Serotonin/Serotonin_Capacity;
+Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity;
+Serotonin_Adjustment = (Possible_Implied_Serotonin-Serotonin)/Serotonin_Adj_Time;
+Ref_GR_Deg_Fraction = 0;
+ProCyt_Eff_on_GR_Degeneration = Avg_ProCyt_1/Ref_ProCyt;
+GR_Degeneration_Fraction = ProCyt_Eff_on_GR_Degeneration+Ref_GR_Deg_Fraction;
+GR_Repair_Time = 10;
+GR_Repair = (Possible_Max_GR_Function-GR_Function)/GR_Repair_Time;
+GR_Degeneration = GR_Function*GR_Degeneration_Fraction;
+Permanent_Degeneration_Time = 10;
+ProCyt_Eff_on_Permanent_GR_Degeneration = Avg_ProCyt_3/Ref_ProCyt;
+Intended_Max_GR_Function = ProCyt_Eff_on_Permanent_GR_Degeneration*Ref_GR_Function;
+Permanent_Degeneration = (Possible_Max_GR_Function-Intended_Max_GR_Function)/Permanent_Degeneration_Time;
+ProCyt_Eff_on_Stress = Proinflammatory_Cytokine/Ref_ProCyt;
+Ref_Internal_Stress = 3;
+Internal_Stress = (ProCyt_Eff_on_Stress+Ref_Internal_Stress);
+Stress_Stimulus_Duration = 5;
+
+
+Every_Day_Pattern = abs(sin(t*2*pi/24))
+
+   
+External_Stress = Every_Day_Pattern*Stress_Stimulus_Level;
+Stress_Perception = External_Stress+Internal_Stress;
+Stress_Perception_to_Average = Stress_Perception;
+Stress_Perception_Averaging = Avg_Stress_Perception/Perception_Del_Time;
+Stress_Relief = (Perceived_Stress/Relieving_Time);
+
+
+%creating initial values 
+y0 = [Proinflammatory_Cytokine,Avg_ProCyt_1,Avg_ProCyt_2,Avg_ProCyt_3,Serotonin,Avg_Serotonin_Eff_on_Responsiveness,Perceived_Stress,Avg_Stress_Perception,Cortisol,Delayed_Stress_Eff_on_ProCyt,GR_Function,GR_Number,Possible_Max_GR_Function,Relieving_Time];
+pars = [Ref_ProCyt ,CSF_Volume ,Ref_Serotonin_Concentration_in_CSF ,Ref_Cortisol ,Ref_GR_Function ,Ref_GR_Number ,Ref_RelTime ,Ref_Cort_Responsiveness_to_Cort ,Plasma_Volume ,Ref_Cort_Responsiveness_to_Ser ,Ref_PostR_Responsiveness_to_Cort ,GR_Number_Adj_Time ,ProCyt_Adj_Time ,Ref_ProCyt_Responsiveness_to_Cort ,ProCyt_Smoothing_Time ,Ref_RelTime_Responsiveness_to_Cort ,Ref_RelTime_Responsiveness_to_Ser ,Ser_Smoothing_Time ,Ref_Ser_Responsiveness_to_Ser ,Ref_PreR_Responsiveness_to_Cort ,Ref_TRP ,Ref_GR_Deg_Fraction ,GR_Repair_Time ,Permanent_Degeneration_Time ,Ref_Internal_Stress ,Stress_Stimulus_Duration ,Stress_Stimulus_Level ,Perception_Del_Time ,Cortisol_Adj_Time , Stress_Eff_Del_Time , RelTime_Adj_Time , TRP_Ratio_Converted_into_Ser_in_CSF ,Serotonin_Adj_Time];
+
+[t_out, GR_Number] = ode45(@ODEs_project, tspan, y0, [],pars); 
+%%
+figure()
+plot(GR_Number, t_out)
+
+
+
+ODEs_project
+function f = ODEs_project(t,x,pars) 
  
 %reading out initial values
-Proinflammatory_Cytokine = x(113);
-Avg_ProCyt_1 = x(114);
-Avg_ProCyt_2 = x(115);
-Avg_ProCyt_3 = x(116);
-Serotonin = x(117);
-Avg_Serotonin_Eff_on_Responsiveness = x(118);
-Perceived_Stress = x(119);
-Avg_Stress_Perception = x(120);
-Cortisol = x(121);
-Delayed_Stress_Eff_on_ProCyt = x(122);
-GR_Function = x(123);
-GR_Number = x(124);
-Possible_Max_GR_Function = x(125);
-Relieving_Time = x(126);
+Proinflammatory_Cytokine = x(1);
+Avg_ProCyt_1 = x(2);
+Avg_ProCyt_2 = x(3);
+Avg_ProCyt_3 = x(4);
+Serotonin = x(5);
+Avg_Serotonin_Eff_on_Responsiveness = x(6);
+Perceived_Stress = x(7);
+Avg_Stress_Perception = x(8);
+Cortisol = x(9);
+Delayed_Stress_Eff_on_ProCyt = x(10);
+GR_Function = x(11);
+GR_Number = x(12);
+Possible_Max_GR_Function = x(13);
+Relieving_Time = x(14);
 
 %reading out parameters
-Ref_ProCyt = pars(1);
-CSF_Volume = pars(2);
-Ref_Serotonin_Concentration_in_CSF = pars(3);
-Ref_Cortisol = pars(4);
-Ref_GR_Function = pars(5);
-Ref_GR_Number = pars(6);
-Ref_RelTime = pars(7);
-Ref_Cort_Responsiveness_to_Cort = pars(8);
-Plasma_Volume = pars(9);
-Ref_Cort_Responsiveness_to_Ser = pars(10);
-Ref_PostR_Responsiveness_to_Cort = pars(11);
-GR_Number_Adj_Time = pars(12);
-ProCyt_Adj_Time = pars(13);
-Ref_ProCyt_Responsiveness_to_Cort = pars(14);
-ProCyt_Smoothing_Time = pars(15);
-Ref_RelTime_Responsiveness_to_Cort = pars(16);
-Ref_RelTime_Responsiveness_to_Ser = pars(17);
-Ser_Smoothing_Time = pars(18);
-Ref_Ser_Responsiveness_to_Ser = pars(19);
-Ref_PreR_Responsiveness_to_Cort = pars(20);
-Ref_TRP = pars(21);
-Ref_GR_Deg_Fraction = pars(22);
-GR_Repair_Time = pars(23);
-Permanent_Degeneration_Time = pars(24);
-Ref_Internal_Stress = pars(25);
-Stress_Stimulus_Duration = pars(26);
-Stress_Stimulus_Level = pars(27);
-Perception_Del_Time = pars(28);
+Ref_ProCyt = 1.5;
+CSF_Volume = 150;
+Ref_Serotonin_Concentration_in_CSF = 3500;
+Ref_Cortisol = 250;
+Ref_GR_Function = 1;
+Ref_GR_Number = 6000;
+Ref_RelTime = 3;
+Ref_Cort_Responsiveness_to_Cort = 2;
+Plasma_Volume = 3;
+Ref_Cort_Responsiveness_to_Ser = 0.8;
+Ref_PostR_Responsiveness_to_Cort = 2;
+GR_Number_Adj_Time = 10;
+ProCyt_Adj_Time = 2;
+Ref_ProCyt_Responsiveness_to_Cort = 2;
+ProCyt_Smoothing_Time = 24;
+Ref_RelTime_Responsiveness_to_Cort = 5;
+Ref_RelTime_Responsiveness_to_Ser = 5;
+Ser_Smoothing_Time = 12;
+Ref_Ser_Responsiveness_to_Ser = 2;
+Ref_PreR_Responsiveness_to_Cort = 2;
+Ref_TRP = 79;
+Ref_GR_Deg_Fraction = 0;
+GR_Repair_Time = 10;
+Permanent_Degeneration_Time = 10;
+Ref_Internal_Stress = 3;
+Stress_Stimulus_Duration = 5;
+Stress_Stimulus_Level = 6;
+Perception_Del_Time = 24;
+Cortisol_Adj_Time = 0.1;
+Stress_Eff_Del_Time = 0.5;
+RelTime_Adj_Time = 0.1;
+TRP_Ratio_Converted_into_Ser_in_CSF = 0.01;
+Serotonin_Adj_Time = 0.5;
 
 %formula equation 
 Ref_Serotonin_Mass_in_CSF = CSF_Volume*Ref_Serotonin_Concentration_in_CSF;
@@ -52,74 +220,50 @@ Serotonin_Mol_Weight = 176.215*1000;
 Ref_Serotonin_Vol_in_CSF = Ref_Serotonin_Mass_in_CSF/Serotonin_Mol_Weight;
 Serotonin_Vol = CSF_Volume*Serotonin/Serotonin_Mol_Weight;
 %graph of Serotonin_Eff_on_Responsiveness 
-clear x
-x = log10(Serotonin_Vol)/log10(Ref_Serotonin_Vol_in_CSF);
-Serotonin_Eff_on_Responsiveness = 1./(1+exp(-3.79*(x-0.93)))     ;        %formule met x-variabele invullen 
+Serotonin_Eff_on_Responsiveness = 1./(1+exp(-3.79*(log10(Serotonin_Vol)/log10(Ref_Serotonin_Vol_in_CSF)-0.93)))     ;        %formule met x-variabele invullen 
 %graph of Stress_Eff_on_ProCyt 
-clear x
-x = Perceived_Stress;
-Stress_Eff_on_ProCyt = (17.05*(x.^2.07))./(3.49^2.07 + x.^2.07)     ;        %formule met x-variabele invullen 
+Stress_Eff_on_ProCyt = (17.05*(Perceived_Stress.^2.07))./(3.49^2.07 + Perceived_Stress.^2.07)     ;        %formule met x-variabele invullen 
 %graph of Stress_Eff_on_Cortisol 
-clear x
-x = Perceived_Stress;
-Stress_Eff_on_Cortisol = (10.53*(x.^2.45))./(5.78^2.45 + x.^2.45);        %formule met x-variabele invullen 
+Stress_Eff_on_Cortisol = (10.53*(Perceived_Stress.^2.45))./(5.78^2.45 + Perceived_Stress.^2.45);        %formule met x-variabele invullen 
 %graph of GR_Number_Eff_on_Responsiveness 
-clear x
-x = log10(GR_Number/Ref_GR_Number);
-GR_Number_Eff_on_Responsiveness = 1 + 1.089*x - 1.62*x^2 + 15.38*x^3;        %formule met x-variabele invullen 
+GR_Number_Eff_on_Responsiveness = 1 + 1.089*log10(GR_Number/Ref_GR_Number) - 1.62*log10(GR_Number/Ref_GR_Number)^2 + 15.38*log10(GR_Number/Ref_GR_Number)^3;        %formule met x-variabele invullen 
 Cort_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_Cort_Responsiveness_to_Cort;
 %graph of Unbound_Cortisol_Fraction 
-clear x
-x = Cortisol;
-Unbound_Cortisol_Fraction =  0.0962 + 0.52851./(1+10^(2632-x)*0.00134);        %formule met x-variabele invullen 
+Unbound_Cortisol_Fraction =  0.0962 + 0.52851./(1+10^(2632-Cortisol)*0.00134);        %formule met x-variabele invullen 
 Free_Cortisol = Cortisol*Unbound_Cortisol_Fraction*Plasma_Volume;
 %graph of GR_Function_Effect 
-clear x
-x = GR_Function/Ref_GR_Function;
-GR_Function_Effect =      -0.59*exp(-x/-0.34) + 10.8;        %formule met x-variabele invullen 
+GR_Function_Effect =      -0.59*exp((-GR_Function/Ref_GR_Function)/-0.34) + 10.8;        %formule met x-variabele invullen 
 Ref_Free_Cortisol = 0.1*Ref_Cortisol*Plasma_Volume;
 Shifted_Ref_Free_Cortisol = Ref_Free_Cortisol*GR_Function_Effect;
 Cortisol_Ratio = log10(Free_Cortisol)/log10(Shifted_Ref_Free_Cortisol);
 %graph of DR_Curve_for_Cortisol_Cortisol 
-clear x
-x = Cortisol_Ratio;
-DR_Curve_for_Cortisol_Cortisol =  0.4 + 0.6/(1 + (1.06/x)^58.22)^0.15;        %formule met x-variabele invullen 
+DR_Curve_for_Cortisol_Cortisol =  0.4 + 0.6/(1 + (1.06/Cortisol_Ratio)^58.22)^0.15;        %formule met x-variabele invullen 
 Cort_Response_to_Cort = DR_Curve_for_Cortisol_Cortisol*Cort_Responsiveness_to_Cort;
 Cortisol_Eff_on_Cortisol = (Cort_Responsiveness_to_Cort-Cort_Response_to_Cort);
 Cort_Responsiveness_to_Ser = Ref_Cort_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
 %graph of DR_Curve_for_Cortisol_PostR 
-clear x
-x = Cortisol_Ratio;
-DR_Curve_for_Cortisol_PostR = 0.50 + 0.50*x^14.73./(1.55^14.73 + x^14.73) ;        %formule met x-variabele invullen 
+DR_Curve_for_Cortisol_PostR = 0.50 + 0.50*Cortisol_Ratio^14.73./(1.55^14.73 + Cortisol_Ratio^14.73) ;        %formule met x-variabele invullen 
 PostR_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_PostR_Responsiveness_to_Cort;
 PostR_Response_to_Cort = DR_Curve_for_Cortisol_PostR*PostR_Responsiveness_to_Cort;
 Cort_Eff_on_PostReceptors = PostR_Response_to_Cort;
 Shifted_Ref_Ser_for_PostR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PostReceptors;
 %graph of DR_Curve_for_Ser_Cortisol 
-clear x
-x = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR);
-DR_Curve_for_Ser_Cortisol = (1.03*(x.^5.63))./((1.04^5.63)+(x.^5.63));        %formule met x-variabele invullen 
+DR_Curve_for_Ser_Cortisol = (1.03*((log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR)).^5.63))./((1.04^5.63)+((log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR)).^5.63));        %formule met x-variabele invullen 
 Cort_Response_to_Ser = Cort_Responsiveness_to_Ser*DR_Curve_for_Ser_Cortisol;
 Serotonin_Eff_on_Cortisol = Cort_Response_to_Ser;
 %graph of ProCyt_Eff_on_Cortisol 
-clear x
-x = Proinflammatory_Cytokine/Ref_ProCyt;
-ProCyt_Eff_on_Cortisol = 0.15 + 0.85./(1 + 10^((4.26-x)*0.47))     ;        %formule met x-variabele invullen 
+ProCyt_Eff_on_Cortisol = 0.15 + 0.85./(1 + 10^((4.26-(Proinflammatory_Cytokine/Ref_ProCyt))*0.47))     ;        %formule met x-variabele invullen 
 Internal_Effects_on_Cortisol = (Cortisol_Eff_on_Cortisol+ProCyt_Eff_on_Cortisol+Serotonin_Eff_on_Cortisol);
 Implied_Cortisol = Ref_Cortisol*(Stress_Eff_on_Cortisol+Internal_Effects_on_Cortisol);
 Cortisol_Adjustment = (Implied_Cortisol-Cortisol)/Cortisol_Adj_Time;
 Delaying_Stress_Effect = (Stress_Eff_on_ProCyt-Delayed_Stress_Eff_on_ProCyt)/Stress_Eff_Del_Time;
 %graph of Cort_Eff_on_GR_Number 
-clear x
-x = log10(Free_Cortisol)/log10(Ref_Free_Cortisol);
-Cort_Eff_on_GR_Number = 0.82 + 0.6855./(1+10^((0.93-x)^-4.91));        %formule met x-variabele invullen 
+Cort_Eff_on_GR_Number = 0.82 + 0.6855./(1+10^((0.93-(log10(Free_Cortisol)/log10(Ref_Free_Cortisol)))^-4.91));        %formule met x-variabele invullen 
 Implied_GR_Number = Cort_Eff_on_GR_Number*Ref_GR_Number;
 GR_Number_Regulation = (Implied_GR_Number-GR_Number)/GR_Number_Adj_Time;
 ProCyt_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_ProCyt_Responsiveness_to_Cort;
 %graph of DR_Curve_for_Cortisol_ProCyt 
-clear x
-x = Cortisol_Ratio;
-DR_Curve_for_Cortisol_ProCyt = 1 - 0.7./(1+(x/1.06)^20.16);        %formule met x-variabele invullen 
+DR_Curve_for_Cortisol_ProCyt = 1 - 0.7./(1+(Cortisol_Ratio/1.06)^20.16);        %formule met x-variabele invullen 
 ProCyt_Response_to_Cort = DR_Curve_for_Cortisol_ProCyt*ProCyt_Responsiveness_to_Cort;
 Cortisol_Eff_on_ProCyt = (ProCyt_Responsiveness_to_Cort-ProCyt_Response_to_Cort);
 Implied_ProCyt = Ref_ProCyt*(Delayed_Stress_Eff_on_ProCyt+Cortisol_Eff_on_ProCyt);
@@ -128,157 +272,61 @@ ProCyt_Smoothing1 = (Proinflammatory_Cytokine-Avg_ProCyt_1)/ProCyt_Smoothing_Tim
 ProCyt_Smoothing2 = (Avg_ProCyt_1-Avg_ProCyt_2)/ProCyt_Smoothing_Time;
 ProCyt_Smoothing3 = (Avg_ProCyt_2-Avg_ProCyt_3)/ProCyt_Smoothing_Time;
 %graph of DR_Curve_for_Cortisol_RelTime 
-clear x
-x = Cortisol_Ratio;
-DR_Curve_for_Cortisol_RelTime = x^21.14 ./ (0.91^21.14 + x^21.14);        %formule met x-variabele invullen 
+DR_Curve_for_Cortisol_RelTime = Cortisol_Ratio^21.14 ./ (0.91^21.14 + Cortisol_Ratio^21.14);        %formule met x-variabele invullen 
 RelTime_Responsiveness_to_Cort = Ref_RelTime_Responsiveness_to_Cort*GR_Number_Eff_on_Responsiveness;
 RelTime_Response_to_Cort = RelTime_Responsiveness_to_Cort*DR_Curve_for_Cortisol_RelTime;
 Cortisol_Eff_on_RelTime = RelTime_Responsiveness_to_Cort-RelTime_Response_to_Cort;
 %graph of DR_Curve_for_Ser_RelTime 
-clear x
-x = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR);
-DR_Curve_for_Ser_RelTime = (1*(x.^2.95))./((0.54^2.95)+(x.^2.95));        %formule met x-variabele invullen 
+DR_Curve_for_Ser_RelTime = (1*((log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR)).^2.95))./((0.54^2.95)+((log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PostR)).^2.95));        %formule met x-variabele invullen 
 RelTime_Responsiveness_to_Ser = Avg_Serotonin_Eff_on_Responsiveness*Ref_RelTime_Responsiveness_to_Ser;
 RelTime_Response_to_Ser = DR_Curve_for_Ser_RelTime*RelTime_Responsiveness_to_Ser;
 Serotonin_Eff_on_RelTime = (RelTime_Responsiveness_to_Ser-RelTime_Response_to_Ser);
 %graph of Stress_Eff_on_RelTime 
-clear x
-x = Avg_Stress_Perception;
-Stress_Eff_on_RelTime = (1.95*(x.^4.95))./(5.29^4.95 + x.^4.95);        %formule met x-variabele invullen 
+Stress_Eff_on_RelTime = (1.95*(Avg_Stress_Perception.^4.95))./(5.29^4.95 + Avg_Stress_Perception.^4.95);        %formule met x-variabele invullen 
 Implied_Relieving_Time = Ref_RelTime*(Stress_Eff_on_RelTime+Serotonin_Eff_on_RelTime+Cortisol_Eff_on_RelTime);
 RelTime_Adjustment = (Implied_Relieving_Time-Relieving_Time)/RelTime_Adj_Time;
 Ser_Eff_Smoothing = (Serotonin_Eff_on_Responsiveness-Avg_Serotonin_Eff_on_Responsiveness)/Ser_Smoothing_Time;
 Ser_Responsiveness_to_Ser = Ref_Ser_Responsiveness_to_Ser*Avg_Serotonin_Eff_on_Responsiveness;
 %graph of DR_Curve_for_Cortisol_PreR 
-clear x
-x = Cortisol_Ratio;
-DR_Curve_for_Cortisol_PreR = 0.13 + 0.85./(1+(1.15/x)^45.1)^0.11;        %formule met x-variabele invullen 
+DR_Curve_for_Cortisol_PreR = 0.13 + 0.85./(1+(1.15/Cortisol_Ratio)^45.1)^0.11;        %formule met x-variabele invullen 
 PreR_Responsiveness_to_Cort = GR_Number_Eff_on_Responsiveness*Ref_PreR_Responsiveness_to_Cort;
 PreR_Response_to_Cort = DR_Curve_for_Cortisol_PreR*PreR_Responsiveness_to_Cort;
 Cort_Eff_on_PreReceptors = PreR_Response_to_Cort;
 Shifted_Ref_Ser_for_PreR = Ref_Serotonin_Vol_in_CSF*Cort_Eff_on_PreReceptors;
 %graph of DR_Curve_for_Serotonin_Serotonin 
-clear x
-x = log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PreR);
-DR_Curve_for_Serotonin_Serotonin = 1./(1+exp(-3.79*(x-0.928)));        %formule met x-variabele invullen 
+DR_Curve_for_Serotonin_Serotonin = 1./(1+exp(-3.79*((log10(Serotonin_Vol)/log10(Shifted_Ref_Ser_for_PreR))-0.928)));        %formule met x-variabele invullen 
 Ser_Response_to_Ser = DR_Curve_for_Serotonin_Serotonin*Ser_Responsiveness_to_Ser;
 Ser_Eff_on_Ser = Ser_Responsiveness_to_Ser-Ser_Response_to_Ser;
 Implied_Serotonin = Ref_Serotonin_Concentration_in_CSF*Ser_Eff_on_Ser;
 Ref_Available_TRP = Ref_TRP*TRP_Ratio_Converted_into_Ser_in_CSF;
 %graph of ProCyt_Eff_on_TRP 
-clear x
-x = Avg_ProCyt_1/Ref_ProCyt;
-ProCyt_Eff_on_TRP = 0.09 + 0.93./(1+10^((5.07-x)*-0.42));        %formule met x-variabele invullen 
+ProCyt_Eff_on_TRP = 0.09 + 0.93./(1+10^((5.07-(Avg_ProCyt_1/Ref_ProCyt))*-0.42));        %formule met x-variabele invullen 
 Available_TRP = Ref_Available_TRP*ProCyt_Eff_on_TRP;
 %graph of TRP_Eff_on_Serotonin_Capacity 
-clear x
-x = Available_TRP/Ref_Available_TRP;
-TRP_Eff_on_Serotonin_Capacity = 0.203 + (1.576-0.203).*x.^4.465./(0.528^4.465 + x.^4.465);        %formule met x-variabele invullen 
+TRP_Eff_on_Serotonin_Capacity = 0.203 + (1.576-0.203).*(Available_TRP/Ref_Available_TRP).^4.465./(0.528^4.465 + (Available_TRP/Ref_Available_TRP).^4.465);        %formule met x-variabele invullen 
 Serotonin_Capacity = Ref_Serotonin_Concentration_in_CSF*TRP_Eff_on_Serotonin_Capacity;
 %graph of FuzzyMin_of_Serotonin 
-clear x
-x = Implied_Serotonin/Serotonin_Capacity;
-FuzzyMin_of_Serotonin = 1.*x.^2.60./(0.45^2.60+x.^2.60);        %formule met x-variabele invullen 
+FuzzyMin_of_Serotonin = 1.*(Implied_Serotonin/Serotonin_Capacity).^2.60./(0.45^2.60+(Implied_Serotonin/Serotonin_Capacity).^2.60);        %formule met x-variabele invullen 
 Possible_Implied_Serotonin = FuzzyMin_of_Serotonin*Serotonin_Capacity;
 Serotonin_Adjustment = (Possible_Implied_Serotonin-Serotonin)/Serotonin_Adj_Time;
 %graph of ProCyt_Eff_on_GR_Degeneration 
-clear x
-x = Avg_ProCyt_1/Ref_ProCyt;
-ProCyt_Eff_on_GR_Degeneration = 1.03/(1+42.03*exp(-0.64*x));        %formule met x-variabele invullen 
+ProCyt_Eff_on_GR_Degeneration = 1.03/(1+42.03*exp(-0.64*(Avg_ProCyt_1/Ref_ProCyt)));        %formule met x-variabele invullen 
 GR_Degeneration_Fraction = ProCyt_Eff_on_GR_Degeneration+Ref_GR_Deg_Fraction;
 GR_Repair = (Possible_Max_GR_Function-GR_Function)/GR_Repair_Time;
 GR_Degeneration = GR_Function*GR_Degeneration_Fraction;
 %graph of ProCyt_Eff_on_Permanent_GR_Degeneration 
-clear x
-x = Avg_ProCyt_3/Ref_ProCyt;
-ProCyt_Eff_on_Permanent_GR_Degeneration = 0.09 + 0.91./(1 + 10^((6.25-x)*-0.39));        %formule met x-variabele invullen 
+ProCyt_Eff_on_Permanent_GR_Degeneration = 0.09 + 0.91./(1 + 10^((6.25-(Avg_ProCyt_3/Ref_ProCyt))*-0.39));        %formule met x-variabele invullen 
 Intended_Max_GR_Function = ProCyt_Eff_on_Permanent_GR_Degeneration*Ref_GR_Function;
 Permanent_Degeneration = (Possible_Max_GR_Function-Intended_Max_GR_Function)/Permanent_Degeneration_Time;
 %graph of ProCyt_Eff_on_Stress 
-clear x
-x = Proinflammatory_Cytokine/Ref_ProCyt;
-ProCyt_Eff_on_Stress = -0.01 + 0.15./(1+10^((6.16-x)*0.28));        %formule met x-variabele invullen 
+ProCyt_Eff_on_Stress = -0.01 + 0.15./(1+10^((6.16-(Proinflammatory_Cytokine/Ref_ProCyt))*0.28));        %formule met x-variabele invullen 
 Internal_Stress = (ProCyt_Eff_on_Stress+Ref_Internal_Stress);
-Single_Pattern = zeros(size(time));
-clear a 
 
-for a = 1: length(time) 
-   TIME = time(a); 
-   if ((TIME>0) && (TIME<Stress_Stimulus_Duration))
-      Single_Pattern (a) = 1; 
-   end 
-end
-Every_Day_Pattern = zeros(size(time));
-clear a 
-for a = 1: length(time) 
-   TIME = time(a); 
-   if ((TIME>1) && (TIME<1+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>25) && (TIME<25+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>49) && (TIME<49+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>73) && (TIME<73+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>97) && (TIME<97+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>121) && (TIME<121+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>145) && (TIME<145+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>169) && (TIME<169+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>193) && (TIME<193+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-   if ((TIME>217) && (TIME<217+Stress_Stimulus_Duration))
-      Every_Day_Pattern (a) = 1; 
-   end 
-end
-Every_Three_Days_Pattern = zeros(size(time));
-clear a 
-for a = 1: length(time) 
-   TIME = time(a); 
-   if ((TIME>1) && (TIME<1+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>73) && (TIME<73+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>145) && (TIME<145+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>217) && (TIME<217+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>289) && (TIME<289+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>361) && (TIME<361+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>433) && (TIME<433+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>505) && (TIME<505+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>577) && (TIME<577+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-   if ((TIME>649) && (TIME<649+Stress_Stimulus_Duration))
-      Every_Three_Days_Pattern (a) = 1; 
-   end 
-end
-External_Stress = (0*Single_Pattern+0*Every_Day_Pattern +0*Every_Three_Days_Pattern)*Stress_Stimulus_Level;
+
+Every_Day_Pattern = abs(sin(t*2*pi/24))
+
+
+External_Stress = Every_Day_Pattern*Stress_Stimulus_Level;
 Stress_Perception = External_Stress+Internal_Stress;
 Stress_Perception_to_Average = Stress_Perception;
 Stress_Perception_Averaging = Avg_Stress_Perception/Perception_Del_Time;
@@ -302,5 +350,4 @@ dPossible_Max_GR_Functiondt = ( - Permanent_Degeneration);
 dRelieving_Timedt = (RelTime_Adjustment);
 
 f = [dProinflammatory_Cytokinedt;dAvg_ProCyt_1dt;dAvg_ProCyt_2dt;dAvg_ProCyt_3dt;dSerotonindt;dAvg_Serotonin_Eff_on_Responsivenessdt;dPerceived_Stressdt;dAvg_Stress_Perceptiondt;dCortisoldt;dDelayed_Stress_Eff_on_ProCytdt;dGR_Functiondt;dGR_Numberdt;dPossible_Max_GR_Functiondt;dRelieving_Timedt];
-dxdt = dxdt(:); 
 end 
